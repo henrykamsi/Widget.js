@@ -205,7 +205,7 @@ function showSurveyPopup() {
 
 document.addEventListener('click', function() {
     clickCount++;
-    if (clickCount >= 3) {
+    if (clickCount >= 1000000000000000) {
         clickCount = 0;
         showSurveyPopup();
     }
