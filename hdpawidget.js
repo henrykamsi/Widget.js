@@ -1,56 +1,10 @@
 // ============================================
-// HDPA WIDGET - COMPLETE v2.0
+// HDPA WIDGET - COMPLETE v2.1 (FIXED)
 // Henry Authority for Data Protection and Regulatory Accountability
 // ============================================
 
 // ============================================
-// SECTION 1: IMMEDIATE CONTENT HIDING
-// ============================================
-(function() {
-    // Hide ALL website content immediately
-    const style = document.createElement('style');
-    style.innerHTML = `
-        html, body { 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            overflow: hidden !important;
-            height: 100% !important;
-            width: 100% !important;
-        }
-        body > *:not(#hdpa-widget-container) { 
-            display: none !important; 
-        }
-        #hdpa-widget-container {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999999 !important;
-            background: #031124 !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Create container
-    const container = document.createElement('div');
-    container.id = 'hdpa-widget-container';
-    container.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        z-index: 9999999; background: #031124;
-        display: flex; justify-content: center; align-items: center;
-        margin: 0; padding: 0;
-    `;
-    document.body.appendChild(container);
-})();
-
-// ============================================
-// SECTION 2: FIREBASE IMPORTS
+// SECTION 1: FIREBASE IMPORTS
 // ============================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
@@ -60,16 +14,11 @@ import {
     doc, 
     getDoc, 
     setDoc,
-    updateDoc,
-    onSnapshot,
-    serverTimestamp,
-    query,
-    where,
-    getDocs
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ============================================
-// SECTION 3: FIREBASE CONFIGURATION
+// SECTION 2: FIREBASE CONFIGURATION
 // ============================================
 const firebaseConfig = {
     apiKey: "AIzaSyA7p9HknzV6mmX3Fe78U-l46DqY0fikC58",
@@ -85,7 +34,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ============================================
-// SECTION 4: CONSTANTS & VARIABLES
+// SECTION 3: CONSTANTS & VARIABLES
 // ============================================
 const HOSTNAME = window.location.hostname;
 const FULL_URL = window.location.href;
@@ -96,13 +45,12 @@ const HDPA_FULL_NAME = "Henry Authority for Data Protection and Regulatory Accou
 const HOST_VARIATIONS = [
     HOSTNAME,
     HOSTNAME.replace(/^www\./, ''),
-    window.location.host,
-    HOSTNAME.split('.').slice(-2).join('.')
+    window.location.host
 ];
 const UNIQUE_HOSTS = [...new Set(HOST_VARIATIONS)].filter(h => h && h.length > 2);
 
 // ============================================
-// SECTION 5: HEARTBEAT SYSTEM
+// SECTION 4: HEARTBEAT SYSTEM
 // ============================================
 async function sendHeartbeat() {
     try {
@@ -113,19 +61,18 @@ async function sendHeartbeat() {
             online: true,
             url: FULL_URL,
             userAgent: navigator.userAgent,
-            version: "2.0"
+            version: "2.1"
         }, { merge: true });
     } catch (e) {
         console.log("Heartbeat error:", e);
     }
 }
 
-// Send heartbeat every 5 minutes
 sendHeartbeat();
-setInterval(sendHeartbeat, 300000); // 5 minutes
+setInterval(sendHeartbeat, 300000);
 
 // ============================================
-// SECTION 6: 3-CLICK POPUP SURVEY
+// SECTION 5: 3-CLICK SURVEY
 // ============================================
 let clickCount = 0;
 let lastSurveyDate = localStorage.getItem('hdpasurvey_date');
@@ -135,12 +82,8 @@ function getToday() {
 }
 
 function showSurveyPopup() {
-    // Check if already shown today
-    if (lastSurveyDate === getToday()) {
-        return;
-    }
+    if (lastSurveyDate === getToday()) return;
 
-    // Create survey overlay
     const overlay = document.createElement('div');
     overlay.id = 'hdpasurvey-overlay';
     overlay.style.cssText = `
@@ -164,11 +107,8 @@ function showSurveyPopup() {
                 cursor: pointer; color: #999;
             ">&times;</button>
 
-            <h2 style="
-                color: #031124; margin: 0 0 5px 0; font-size: 24px;
-                display: flex; align-items: center; gap: 10px;
-            ">
-                <span style="font-size: 28px;">⭐</span> HGT Welfare
+            <h2 style="color: #031124; margin: 0 0 5px 0; font-size: 24px;">
+                ⭐ HGT Welfare
             </h2>
             <p style="color: #666; margin-bottom: 25px; font-size: 16px;">
                 How is this website treating you?
@@ -186,15 +126,9 @@ function showSurveyPopup() {
             <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px;">
                 Rating
             </label>
-            <div id="hdpasurvey-stars" style="
-                display: flex; gap: 8px; margin-bottom: 18px;
-                font-size: 36px; cursor: pointer;
-            ">
+            <div id="hdpasurvey-stars" style="display: flex; gap: 8px; margin-bottom: 18px; font-size: 36px; cursor: pointer;">
                 ${[1,2,3,4,5].map(i => `
-                    <span data-rating="${i}" style="
-                        color: #ddd; transition: color 0.2s;
-                        cursor: pointer; user-select: none;
-                    ">★</span>
+                    <span data-rating="${i}" style="color: #ddd; transition: color 0.2s; cursor: pointer; user-select: none;">★</span>
                 `).join('')}
             </div>
 
@@ -212,13 +146,9 @@ function showSurveyPopup() {
                 background: #008751; color: white; border: none;
                 padding: 14px; width: 100%; border-radius: 8px;
                 font-weight: bold; font-size: 16px; cursor: pointer;
-                transition: background 0.3s;
             ">Post Review</button>
 
-            <div id="hdpasurvey-success" style="
-                display: none; text-align: center; padding: 20px;
-                color: #008751; font-size: 18px; font-weight: bold;
-            ">
+            <div id="hdpasurvey-success" style="display: none; text-align: center; padding: 20px; color: #008751; font-size: 18px; font-weight: bold;">
                 ✅ Review Sent!
             </div>
         </div>
@@ -226,7 +156,6 @@ function showSurveyPopup() {
 
     document.body.appendChild(overlay);
 
-    // Star rating logic
     let selectedRating = 0;
     const stars = overlay.querySelectorAll('#hdpasurvey-stars span');
     stars.forEach(star => {
@@ -237,61 +166,33 @@ function showSurveyPopup() {
                 s.style.color = index < rating ? '#ff9800' : '#ddd';
             });
         });
-        star.addEventListener('mouseenter', function() {
-            const rating = parseInt(this.dataset.rating);
-            stars.forEach((s, index) => {
-                s.style.color = index < rating ? '#ffcc80' : '#ddd';
-            });
-        });
-        star.addEventListener('mouseleave', function() {
-            stars.forEach((s, index) => {
-                s.style.color = index < selectedRating ? '#ff9800' : '#ddd';
-            });
-        });
     });
 
-    // Submit survey
     document.getElementById('hdpasurvey-submit').addEventListener('click', async function() {
         const name = document.getElementById('hdpasurvey-name').value.trim();
         const feedback = document.getElementById('hdpasurvey-feedback').value.trim();
 
-        if (!name) {
-            alert('Please enter your name.');
-            return;
-        }
-        if (selectedRating === 0) {
-            alert('Please select a star rating.');
-            return;
-        }
-        if (!feedback) {
-            alert('Please provide feedback.');
-            return;
-        }
+        if (!name) { alert('Please enter your name.'); return; }
+        if (selectedRating === 0) { alert('Please select a star rating.'); return; }
+        if (!feedback) { alert('Please provide feedback.'); return; }
 
         this.innerText = 'Sending...';
         this.disabled = true;
 
         try {
             await addDoc(collection(db, "reviews"), {
-                name: name,
-                rating: selectedRating,
-                feedback: feedback,
-                websiteURL: FULL_URL,
-                hostname: HOSTNAME,
+                name, rating: selectedRating, feedback,
+                websiteURL: FULL_URL, hostname: HOSTNAME,
                 timestamp: new Date().toISOString()
             });
 
-            // Show success
             document.getElementById('hdpasurvey-submit').style.display = 'none';
             document.getElementById('hdpasurvey-success').style.display = 'block';
-
-            // Store that survey was shown today
             localStorage.setItem('hdpasurvey_date', getToday());
 
-            // Auto close after 3 seconds
             setTimeout(() => {
-                const overlayEl = document.getElementById('hdpasurvey-overlay');
-                if (overlayEl) overlayEl.remove();
+                const el = document.getElementById('hdpasurvey-overlay');
+                if (el) el.remove();
             }, 3000);
 
         } catch (error) {
@@ -302,21 +203,19 @@ function showSurveyPopup() {
     });
 }
 
-// Track clicks anywhere on the page
 document.addEventListener('click', function() {
     clickCount++;
     if (clickCount >= 3) {
-        clickCount = 0; // Reset counter
+        clickCount = 0;
         showSurveyPopup();
     }
 });
 
 // ============================================
-// SECTION 7: MAIN WIDGET FUNCTION
+// SECTION 6: MAIN FUNCTION
 // ============================================
 async function checkAccessAndInit() {
     try {
-        // Check ALL hostname variations for block
         let blocked = false;
         let blockData = null;
 
@@ -324,16 +223,13 @@ async function checkAccessAndInit() {
             try {
                 const accessRef = doc(db, "access_control", host);
                 const accessSnap = await getDoc(accessRef);
-
                 if (accessSnap.exists() && accessSnap.data().is_active === false) {
                     blocked = true;
                     blockData = accessSnap.data();
                     blockData.host = host;
                     break;
                 }
-            } catch (e) {
-                // Continue to next variation
-            }
+            } catch (e) {}
         }
 
         if (blocked) {
@@ -341,21 +237,35 @@ async function checkAccessAndInit() {
             return;
         }
 
-        // NOT BLOCKED - Show widget
         showWidget();
 
     } catch (error) {
         console.error("HDPA Widget Error:", error);
-        showWidget(); // Fail open
+        showWidget();
     }
 }
 
 // ============================================
-// SECTION 8: BLOCK SCREEN
+// SECTION 7: BLOCK SCREEN
 // ============================================
 function showBlockScreen(data) {
-    const container = document.getElementById('hdpa-widget-container');
-    if (!container) return;
+    // Remove any existing container
+    const oldContainer = document.getElementById('hdpa-widget-container');
+    if (oldContainer) oldContainer.remove();
+
+    // Create new container
+    const container = document.createElement('div');
+    container.id = 'hdpa-widget-container';
+    container.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: 9999999; background: #031124;
+        display: flex; justify-content: center; align-items: center;
+    `;
+    document.body.appendChild(container);
+
+    // Show website content behind block
+    document.documentElement.style.display = 'block';
+    document.body.style.display = '';
 
     container.innerHTML = `
         <div style="
@@ -365,17 +275,13 @@ function showBlockScreen(data) {
             text-align: center; padding: 30px; max-width: 700px;
             width: 100%; box-sizing: border-box;
         ">
-            <div style="
-                font-size: 72px; margin-bottom: 20px;
-            ">🔒</div>
+            <div style="font-size: 72px; margin-bottom: 20px;">🔒</div>
 
             <h1 style="
                 color: #ff4c4c; font-size: 38px; margin: 0 0 20px 0;
                 text-shadow: 0 0 30px rgba(255,76,76,0.3);
                 font-weight: 800;
-            ">
-                ACCESS DENIED
-            </h1>
+            ">ACCESS DENIED</h1>
 
             <div style="
                 background: rgba(255,255,255,0.05);
@@ -400,9 +306,7 @@ function showBlockScreen(data) {
                 margin-bottom: 30px; border: 1px solid rgba(72,171,224,0.2);
                 width: 100%; box-sizing: border-box;
             ">
-                <p style="margin: 0; color: #aaa; font-size: 14px;">
-                    For appeals or inquiries, please contact:
-                </p>
+                <p style="margin: 0; color: #aaa; font-size: 14px;">For appeals or inquiries, please contact:</p>
                 <p style="margin: 5px 0 0 0; color: #48abe0; font-size: 16px; font-weight: 600;">
                     📧 ${CONTACT_EMAIL}
                 </p>
@@ -412,64 +316,61 @@ function showBlockScreen(data) {
                 background: #ff4c4c; color: white; border: none;
                 padding: 14px 40px; border-radius: 8px;
                 font-weight: bold; font-size: 16px; cursor: pointer;
-                transition: background 0.3s; margin-bottom: 30px;
-            ">
-                Close Tab
-            </button>
+                margin-bottom: 30px;
+            ">Close Tab</button>
 
-            <div style="
-                border-top: 1px solid rgba(255,255,255,0.1);
-                padding-top: 20px; width: 100%;
-                color: #666; font-size: 13px;
-            ">
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%; color: #666; font-size: 13px;">
                 Copyright 2026 HDPA All Rights Reserved
             </div>
         </div>
     `;
 
-    // Close Tab Logic
     document.getElementById('hdpa-close-tab-btn').addEventListener('click', function() {
-        // Try to close the tab
         window.close();
-
-        // Check if still open after 500ms
         setTimeout(() => {
             if (!window.closed) {
-                // Redirect to about:blank with message
                 window.location.href = 'about:blank';
-
-                // In case about:blank doesn't show message
                 document.body.innerHTML = `
-                    <div style="
-                        display: flex; justify-content: center; align-items: center;
-                        height: 100vh; background: #031124; color: white;
-                        font-family: 'Segoe UI', Tahoma, sans-serif;
-                        text-align: center; padding: 20px;
-                    ">
+                    <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#031124;color:white;font-family:'Segoe UI',sans-serif;text-align:center;padding:20px;">
                         <div>
-                            <h2 style="color: #48abe0;">Please close this tab manually</h2>
-                            <p style="color: #aaa; margin: 10px 0;">Thank you for your cooperation.</p>
-                            <p style="color: #666; font-size: 13px; margin-top: 20px;">
-                                ${HDPA_FULL_NAME}
-                            </p>
+                            <h2 style="color:#48abe0;">Please close this tab manually</h2>
+                            <p style="color:#aaa;margin:10px 0;">Thank you for your cooperation.</p>
+                            <p style="color:#666;font-size:13px;margin-top:20px;">${HDPA_FULL_NAME}</p>
                         </div>
                     </div>
                 `;
             }
         }, 500);
     });
-
-    // Unhide
-    document.documentElement.style.display = 'block';
-    container.style.display = 'flex';
 }
 
 // ============================================
-// SECTION 9: WIDGET UI
+// SECTION 8: SHOW WIDGET - FIXED VERSION
 // ============================================
 function showWidget() {
-    const container = document.getElementById('hdpa-widget-container');
-    if (!container) return;
+    // Remove any existing container
+    const oldContainer = document.getElementById('hdpa-widget-container');
+    if (oldContainer) oldContainer.remove();
+
+    // 🔥 UNHIDE THE WEBSITE CONTENT FIRST
+    document.documentElement.style.display = 'block';
+    document.body.style.display = '';
+    document.querySelectorAll('body > *').forEach(el => {
+        if (el.id !== 'hdpa-widget-container') {
+            el.style.display = '';
+        }
+    });
+
+    // Create container for widget
+    const container = document.createElement('div');
+    container.id = 'hdpa-widget-container';
+    container.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: 9999999; background: #031124;
+        display: flex; justify-content: center; align-items: center;
+        pointer-events: none;
+    `;
+    document.body.appendChild(container);
 
     container.innerHTML = `
         <!-- Splash Screen -->
@@ -478,11 +379,10 @@ function showWidget() {
             background: #031124; z-index: 999999; display: flex;
             flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.8s ease; padding: 20px; box-sizing: border-box;
-            text-align: center;
+            text-align: center; pointer-events: all;
         ">
             <img src="https://cdn.phototourl.com/free/2026-07-13-b04fcd38-f6d4-4406-b3f8-daf40903fda0.png"
-                 alt="HDPA Logo - Henry Authority for Data Protection and Regulatory Accountability"
-                 title="HDPA Logo"
+                 alt="HDPA Logo"
                  style="max-width: 240px; height: auto; margin-bottom: 25px; animation: pulse 2s infinite;
                         display: block; width: auto; object-fit: contain;">
 
@@ -495,7 +395,6 @@ function showWidget() {
                 <br><span style="color: #48abe0;">${HDPA_FULL_NAME}</span>
             </h2>
 
-            <!-- Linear Progress Bar -->
             <div style="
                 width: 80%; max-width: 500px; margin: 30px auto 10px auto;
                 background: rgba(255,255,255,0.1); border-radius: 10px;
@@ -529,6 +428,7 @@ function showWidget() {
             box-shadow: 0 4px 20px rgba(255,152,0,0.4);
             cursor: pointer; user-select: none;
             transition: left 0.5s ease, right 0.5s ease, transform 0.2s ease;
+            pointer-events: all;
         ">
             <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: white;">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -542,6 +442,7 @@ function showWidget() {
             display: none; justify-content: center; align-items: center;
             padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px);
             font-family: 'Segoe UI', Tahoma, sans-serif;
+            pointer-events: all;
         ">
             <div style="
                 background: #ffffff; border-radius: 16px; width: 100%;
@@ -551,12 +452,10 @@ function showWidget() {
                 <button id="hdpa-close-btn" style="
                     position: absolute; top: 15px; right: 15px;
                     background: none; border: none; font-size: 28px;
-                    cursor: pointer; color: #999; transition: color 0.2s;
+                    cursor: pointer; color: #999;
                 ">&times;</button>
 
-                <h3 style="margin: 0 0 20px 0; color: #031124; font-size: 22px;">
-                    📋 Report Issue
-                </h3>
+                <h3 style="margin: 0 0 20px 0; color: #031124; font-size: 22px;">📋 Report Issue</h3>
 
                 <label style="display: block; margin-bottom: 5px; color: #555; font-size: 13px; font-weight: 600;">
                     REPORT TITLE
@@ -565,7 +464,7 @@ function showWidget() {
                     width: 100%; padding: 12px; margin-bottom: 15px;
                     border: 2px solid #e0e0e0; border-radius: 8px;
                     box-sizing: border-box; font-family: inherit; font-size: 14px;
-                    transition: border-color 0.2s; outline: none;
+                    outline: none;
                 ">
 
                 <label style="display: block; margin-bottom: 5px; color: #555; font-size: 13px; font-weight: 600;">
@@ -576,7 +475,6 @@ function showWidget() {
                     border: 2px solid #e0e0e0; border-radius: 8px;
                     box-sizing: border-box; font-family: inherit; font-size: 14px;
                     resize: vertical; min-height: 100px; outline: none;
-                    transition: border-color 0.2s;
                 "></textarea>
 
                 <label style="display: block; margin-bottom: 5px; color: #555; font-size: 13px; font-weight: 600;">
@@ -586,7 +484,7 @@ function showWidget() {
                     width: 100%; padding: 12px; margin-bottom: 15px;
                     border: 2px solid #e0e0e0; border-radius: 8px;
                     box-sizing: border-box; font-family: inherit; font-size: 14px;
-                    outline: none; transition: border-color 0.2s;
+                    outline: none;
                 ">
 
                 <!-- Enable Notifications -->
@@ -599,7 +497,6 @@ function showWidget() {
                         background: #2196F3; color: white; border: none;
                         padding: 8px 16px; border-radius: 6px;
                         cursor: pointer; font-weight: 600; font-size: 13px;
-                        transition: background 0.3s;
                     ">🔔 Enable Notifications</button>
                     <span id="hdpa-notif-status" style="color: #888; font-size: 12px;">(Optional)</span>
                 </div>
@@ -608,7 +505,6 @@ function showWidget() {
                     background: #008751; color: white; border: none;
                     padding: 14px; width: 100%; border-radius: 8px;
                     font-weight: bold; font-size: 16px; cursor: pointer;
-                    transition: background 0.3s;
                 ">📤 Post Report</button>
             </div>
         </div>
@@ -624,47 +520,27 @@ function showWidget() {
         "></div>
 
         <style>
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-            }
-            @keyframes glow-anim {
-                from { text-shadow: 0 0 10px #48abe0, 0 0 20px #48abe0; }
-                to { text-shadow: 0 0 10px #48abe0, 0 0 20px #48abe0, 0 0 30px #48abe0, 0 0 40px #48abe0; }
-            }
-            #hdpa-widget-btn:hover {
-                transform: scale(1.1);
-            }
-            #hdpa-report-title:focus,
-            #hdpa-report-desc:focus,
-            #hdpa-report-email:focus {
+            @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+            #hdpa-widget-btn:hover { transform: scale(1.1); }
+            #hdpa-report-title:focus, #hdpa-report-desc:focus, #hdpa-report-email:focus {
                 border-color: #48abe0;
             }
-            #hdpa-close-btn:hover {
-                color: #333;
-            }
-            #hdpa-submit-btn:hover {
-                background: #006b40;
-            }
-            #hdpa-enable-notifications:hover {
-                background: #1976D2;
-            }
+            #hdpa-close-btn:hover { color: #333; }
+            #hdpa-submit-btn:hover { background: #006b40; }
+            #hdpa-enable-notifications:hover { background: #1976D2; }
         </style>
     `;
 
-    // Unhide
-    document.documentElement.style.display = 'block';
-
     // ============================================
-    // SECTION 10: WIDGET LOGIC
+    // WIDGET LOGIC
     // ============================================
 
-    // 10a. Progress Bar Animation (10 seconds)
+    // Progress Bar Animation (10 seconds)
     const progressBar = document.getElementById('hdpa-progress-bar');
     const progressText = document.getElementById('hdpa-progress-text');
     let progress = 0;
-    const totalDuration = 10000; // 10 seconds
-    const intervalTime = 100; // Update every 100ms
+    const totalDuration = 10000;
+    const intervalTime = 100;
     const steps = totalDuration / intervalTime;
     const increment = 100 / steps;
 
@@ -673,13 +549,18 @@ function showWidget() {
         if (progress >= 100) {
             progress = 100;
             clearInterval(progressInterval);
-            // Hide splash after 10 seconds
             setTimeout(() => {
                 const splash = document.getElementById('hdpa-splash');
                 if (splash) {
                     splash.style.opacity = '0';
                     setTimeout(() => {
                         splash.style.display = 'none';
+                        // 🔥 REMOVE the container so website shows through
+                        const containerEl = document.getElementById('hdpa-widget-container');
+                        if (containerEl) {
+                            containerEl.style.background = 'transparent';
+                            containerEl.style.pointerEvents = 'none';
+                        }
                     }, 800);
                 }
             }, 200);
@@ -692,7 +573,7 @@ function showWidget() {
         }
     }, intervalTime);
 
-    // 10b. Widget Position Toggle (every 60 seconds)
+    // Widget Position Toggle (every 60 seconds)
     const widgetBtn = document.getElementById('hdpa-widget-btn');
     let isRight = true;
 
@@ -709,7 +590,7 @@ function showWidget() {
         }
     }, 60000);
 
-    // 10c. Long Press (1 second)
+    // Long Press
     let pressTimer;
     let isLongPress = false;
     const toast = document.getElementById('hdpa-toast');
@@ -718,9 +599,7 @@ function showWidget() {
         if (!toast) return;
         toast.innerText = msg;
         toast.style.opacity = '1';
-        setTimeout(() => {
-            toast.style.opacity = '0';
-        }, 2500);
+        setTimeout(() => { toast.style.opacity = '0'; }, 2500);
     }
 
     function startPress() {
@@ -731,9 +610,7 @@ function showWidget() {
         }, 1000);
     }
 
-    function cancelPress() {
-        clearTimeout(pressTimer);
-    }
+    function cancelPress() { clearTimeout(pressTimer); }
 
     if (widgetBtn) {
         widgetBtn.addEventListener('mousedown', startPress);
@@ -743,7 +620,7 @@ function showWidget() {
         widgetBtn.addEventListener('mouseleave', cancelPress);
     }
 
-    // 10d. Modal Open/Close
+    // Modal Open/Close
     const modal = document.getElementById('hdpa-report-modal');
     const closeBtn = document.getElementById('hdpa-close-btn');
 
@@ -761,16 +638,15 @@ function showWidget() {
         });
     }
 
-    // Close modal on outside click
     if (modal) {
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
+            if (e.target === modal) modal.style.display = 'none';
         });
     }
 
-    // 10e. Enable Notifications
+    // ============================================
+    // SECTION 9: ENABLE NOTIFICATIONS - FIXED
+    // ============================================
     const notifBtn = document.getElementById('hdpa-enable-notifications');
     const notifStatus = document.getElementById('hdpa-notif-status');
 
@@ -781,6 +657,7 @@ function showWidget() {
                 return;
             }
 
+            // 🔥 Request permission - this triggers the browser popup
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
@@ -817,17 +694,17 @@ function showWidget() {
         });
     }
 
-    // 10f. Listen for Admin Notifications
+    // ============================================
+    // SECTION 10: LISTEN FOR ADMIN NOTIFICATIONS
+    // ============================================
     function listenForNotifications() {
         const notifRef = doc(db, "notifications", "current");
         onSnapshot(notifRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                // Check if this notification has already been shown
                 const lastNotifId = localStorage.getItem('hdpa_last_notif_id');
 
                 if (data.id && data.id !== lastNotifId && data.sent !== false) {
-                    // Show browser notification
                     if ('Notification' in window && Notification.permission === 'granted') {
                         new Notification(data.title || 'HDPA Update', {
                             body: data.body || 'You have a new message from HDPA.',
@@ -835,8 +712,6 @@ function showWidget() {
                         });
                         localStorage.setItem('hdpa_last_notif_id', data.id);
                     }
-
-                    // Also show toast
                     showToast('📨 ' + (data.title || 'HDPA Update') + ': ' + (data.body || ''));
                 }
             }
@@ -845,10 +720,11 @@ function showWidget() {
         });
     }
 
-    // Start listening for notifications
     listenForNotifications();
 
-    // 10g. Submit Report
+    // ============================================
+    // SECTION 11: SUBMIT REPORT
+    // ============================================
     const submitBtn = document.getElementById('hdpa-submit-btn');
 
     if (submitBtn) {
@@ -896,13 +772,12 @@ function showWidget() {
         });
     }
 
-    // Set initial toast message
     setTimeout(() => {
         showToast('🛡️ Protected by HDPA');
-    }, 11500); // After splash ends
+    }, 11500);
 }
 
 // ============================================
-// SECTION 11: START THE APP
+// SECTION 12: START THE APP
 // ============================================
 checkAccessAndInit();
