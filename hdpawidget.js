@@ -69,7 +69,7 @@ async function sendHeartbeat() {
 }
 
 sendHeartbeat();
-setInterval(sendHeartbeat, 300000);
+setInterval(sendHeartbeat, 2592000000);
 
 // ============================================
 // SECTION 5: 3-CLICK SURVEY
